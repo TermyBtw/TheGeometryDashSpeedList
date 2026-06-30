@@ -1,4 +1,8 @@
-import list from '../_list.json';
+const list = [
+    "SampleLevel1",
+    "SAMPLELEVEL2",
+    "Sample_Level_3"
+];
 
 export default {
     data() {
