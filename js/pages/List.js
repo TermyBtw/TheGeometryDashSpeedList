@@ -37,7 +37,7 @@ export default {
                         <td class="level" :class="{ active: selected === i, error: !level }">
                             <button @click="selected = i">
                                 <span class="type-label-lg">
-                                    {{ level?.name || ('Error (' + err + '.json)') }}
+                                    {{ level && level.name ? level.name : ('Error (' + err + '.json)') }}
                                 </span>
                             </button>
                         </td>
@@ -117,7 +117,7 @@ export default {
                             <td class="mobile">
                                 <img
                                     v-if="record.mobile"
-                                    :src="`/assets/phone-landscape${store.dark ? '-dark' : ''}.svg`"
+                                    :src="`/TheGeometryDashSpeedList/assets/phone-landscape${store.dark ? '-dark' : ''}.svg`"
                                     alt="Mobile"
                                 />
                             </td>
