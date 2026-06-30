@@ -117,7 +117,7 @@ export default {
                             <td class="mobile">
                                 <img
                                     v-if="record.mobile"
-                                    :src="`/TheGeometryDashSpeedList/assets/phone-landscape${store.dark ? '-dark' : ''}.svg`"
+                                    ::src="`./assets/phone-landscape${store.dark ? '-dark' : ''}.svg`"
                                     alt="Mobile"
                                 />
                             </td>
