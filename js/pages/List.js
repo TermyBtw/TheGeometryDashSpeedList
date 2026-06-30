@@ -148,7 +148,7 @@ export default {
                             <li v-for="(editor, eIndex) in editors" :key="eIndex">
 
                                 <img
-                                    :src="`${BASE}/assets/${roleIconMap[editor.role]}${store.dark ? '-dark' : ''}.svg`"
+                                    :src="`./assets/${roleIconMap[editor.role]}${store.dark ? '-dark' : ''}.svg`"
                                     :alt="editor.role"
                                 />
 
