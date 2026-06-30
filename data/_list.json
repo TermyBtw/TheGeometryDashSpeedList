@@ -1,21 +1,4 @@
-const list = [
-    "SampleLevel1",
-    "SAMPLELEVEL2",
-    "Sample_Level_3"
-];
-
-export default {
-    data() {
-        return {
-            levels: list
-        };
-    },
-    template: `
-        <div>
-            <h1>List</h1>
-            <div v-for="level in levels" :key="level">
-                {{ level }}
-            </div>
-        </div>
-    `
-};
+[ "SampleLevel1", 
+"SAMPLELEVEL2", 
+"Sample_Level_3"
+]
