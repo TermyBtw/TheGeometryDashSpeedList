@@ -6,6 +6,12 @@ import { fetchEditors, fetchList } from "../content.js";
 import Spinner from "../components/Spinner.js";
 import LevelAuthors from "../components/List/LevelAuthors.js";
 
+/**
+ * IMPORTANT:
+ * GitHub Pages base path fix
+ */
+const BASE = "/TheGeometryDashSpeedList";
+
 const roleIconMap = {
     owner: "crown",
     admin: "user-gear",
@@ -37,7 +43,7 @@ export default {
                         <td class="level" :class="{ active: selected === i, error: !level }">
                             <button @click="selected = i">
                                 <span class="type-label-lg">
-                                    {{ level && level.name ? level.name : ('Error (' + err + '.json)') }}
+                                    {{ level?.name || ('Error (' + err + '.json)') }}
                                 </span>
                             </button>
                         </td>
@@ -88,18 +94,6 @@ export default {
                     </ul>
 
                     <h2>Records</h2>
-
-                    <p v-if="selected + 1 <= 75">
-                        <strong>{{ level.percentToQualify }}%</strong> or better to qualify
-                    </p>
-
-                    <p v-else-if="selected + 1 <= 150">
-                        <strong>100%</strong> or better to qualify
-                    </p>
-
-                    <p v-else>
-                        This level does not accept new records.
-                    </p>
 
                     <table class="records">
                         <tr v-for="(record, rIndex) in level.records" :key="rIndex" class="record">
@@ -154,7 +148,7 @@ export default {
                             <li v-for="(editor, eIndex) in editors" :key="eIndex">
 
                                 <img
-                                    :src="`./assets/${roleIconMap[editor.role]}${store.dark ? '-dark' : ''}.svg`"
+                                    :src="`${BASE}/assets/${roleIconMap[editor.role]}${store.dark ? '-dark' : ''}.svg`"
                                     :alt="editor.role"
                                 />
 
@@ -226,7 +220,7 @@ export default {
             this.editors = await fetchEditors();
 
             if (!this.list) {
-                this.errors.push("Failed to load list. Retry later.");
+                this.errors.push("Failed to load list.");
             }
 
             if (this.list?.length) {
@@ -242,8 +236,8 @@ export default {
             }
 
         } catch (e) {
-            this.errors.push("Unexpected error loading list.");
             console.error(e);
+            this.errors.push("Unexpected error loading list.");
         }
 
         this.loading = false;
