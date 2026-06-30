@@ -1,21 +1,28 @@
 import { round, score } from './score.js';
 
-/**
- * Path to directory containing `_list.json` and all levels
- * FIX: use relative path for GitHub Pages compatibility
- */
-const dir = './data';
+const dir = '/TheGeometryDashSpeedList/data';
 
+/* ---------------- LIST ---------------- */
 export async function fetchList() {
     try {
-        const listResult = await fetch(`${dir}/_list.json`);
-        const list = await listResult.json();
+        const res = await fetch(`${dir}/_list.json`);
+
+        if (!res.ok) {
+            throw new Error(`List fetch failed: ${res.status}`);
+        }
+
+        const list = await res.json();
 
         return await Promise.all(
             list.map(async (path, rank) => {
                 try {
-                    const levelResult = await fetch(`${dir}/${path}.json`);
-                    const level = await levelResult.json();
+                    const levelRes = await fetch(`${dir}/${path}.json`);
+
+                    if (!levelRes.ok) {
+                        throw new Error(`Level ${path} not found`);
+                    }
+
+                    const level = await levelRes.json();
 
                     return [
                         {
@@ -28,50 +35,53 @@ export async function fetchList() {
                         null,
                     ];
                 } catch (e) {
-                    console.error(`Failed to load level #${rank + 1}: ${path}`, e);
+                    console.error(`Failed level #${rank + 1}: ${path}`, e);
                     return [null, path];
                 }
             })
         );
+
     } catch (e) {
-        console.error(`Failed to load list.`, e);
+        console.error('FAILED TO LOAD LIST:', e);
         return null;
     }
 }
 
+/* ---------------- EDITORS ---------------- */
 export async function fetchEditors() {
     try {
         const res = await fetch(`${dir}/_editors.json`);
+
+        if (!res.ok) {
+            throw new Error('Editors fetch failed');
+        }
+
         return await res.json();
     } catch (e) {
-        console.error("Failed to load editors.", e);
+        console.error('Failed to load editors:', e);
         return null;
     }
 }
 
+/* ---------------- LEADERBOARD ---------------- */
 export async function fetchLeaderboard() {
-    const list = await fetchList();
+    const result = await fetchList();
+
+    if (!result) return [[], []];
+
+    const [list, errs] = result;
 
     const scoreMap = {};
-    const errs = [];
 
-    list?.forEach(([level, err], rank) => {
-        if (err || !level) {
-            errs.push(err || `level-${rank}`);
-            return;
-        }
+    list.forEach(([level, err], rank) => {
+        if (err || !level) return;
 
-        // Verification
         const verifier =
             Object.keys(scoreMap).find(
                 u => u.toLowerCase() === level.verifier?.toLowerCase()
             ) || level.verifier;
 
-        scoreMap[verifier] ??= {
-            verified: [],
-            completed: [],
-            progressed: [],
-        };
+        scoreMap[verifier] ??= { verified: [], completed: [], progressed: [] };
 
         scoreMap[verifier].verified.push({
             rank: rank + 1,
@@ -80,18 +90,13 @@ export async function fetchLeaderboard() {
             link: level.verification,
         });
 
-        // Records
         level.records?.forEach(record => {
             const user =
                 Object.keys(scoreMap).find(
                     u => u.toLowerCase() === record.user?.toLowerCase()
                 ) || record.user;
 
-            scoreMap[user] ??= {
-                verified: [],
-                completed: [],
-                progressed: [],
-            };
+            scoreMap[user] ??= { verified: [], completed: [], progressed: [] };
 
             if (record.percent === 100) {
                 scoreMap[user].completed.push({
@@ -114,7 +119,7 @@ export async function fetchLeaderboard() {
 
     const res = Object.entries(scoreMap).map(([user, scores]) => {
         const total = [...scores.verified, ...scores.completed, ...scores.progressed]
-            .reduce((sum, cur) => sum + cur.score, 0);
+            .reduce((a, b) => a + b.score, 0);
 
         return {
             user,
@@ -123,8 +128,5 @@ export async function fetchLeaderboard() {
         };
     });
 
-    return [
-        res.sort((a, b) => b.total - a.total),
-        errs,
-    ];
+    return [res.sort((a, b) => b.total - a.total), errs];
 }
